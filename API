@@ -1,0 +1,39 @@
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+
+public class GitHubAPIWrapper {
+    private final String baseUrl = "https://api.github.com";
+    private final String accessToken;
+
+    public GitHubAPIWrapper(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getUserRepos(String username) {
+        try {
+            HttpClient httpClient = HttpClients.createDefault();
+            String endpoint = baseUrl + "/users/" + username + "/repos";
+            HttpGet httpGet = new HttpGet(endpoint);
+            httpGet.setHeader("Authorization", "Bearer " + accessToken);
+
+            HttpResponse response = httpClient.execute(httpGet);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Uh-oh, something went wrong!
+            // Handle errors here with style 😎
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        String accessToken = "YOUR_GITHUB_ACCESS_TOKEN";
+        GitHubAPIWrapper apiWrapper = new GitHubAPIWrapper(accessToken);
+
+        String username = "YourGitHubUsername";
+        String repos = apiWrapper.getUserRepos(username);
+        System.out.println("User Repositories: " + repos);
+    }
+}
