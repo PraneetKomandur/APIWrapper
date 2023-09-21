@@ -2,38 +2,51 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
-public class GitHubAPIWrapper {
-    private final String baseUrl = "https://api.github.com";
-    private final String accessToken;
+public class WeatherApp {
+    private final String baseUrl = "https://api.openweathermap.org/data/2.5";
+    private final String apiKey;
 
-    public GitHubAPIWrapper(String accessToken) {
-        this.accessToken = accessToken;
+    public WeatherApp(String apiKey) {
+        this.apiKey = apiKey;
     }
 
-    public String getUserRepos(String username) {
+    public String getWeather(String city) {
         try {
             HttpClient httpClient = HttpClients.createDefault();
-            String endpoint = baseUrl + "/users/" + username + "/repos";
+            String endpoint = baseUrl + "/weather?q=" + city + "&appid=" + apiKey;
             HttpGet httpGet = new HttpGet(endpoint);
-            httpGet.setHeader("Authorization", "Bearer " + accessToken);
 
             HttpResponse response = httpClient.execute(httpGet);
 
+            if (response.getStatusLine().getStatusCode() == 200) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                // You can parse the JSON response here and extract weather information.
+                // Example: String weatherDescription = extractWeatherDescription(jsonResponse);
+                return jsonResponse;
+            } else {
+                System.err.println("Error: Failed to retrieve weather data. Status code: " +
+                        response.getStatusLine().getStatusCode());
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            // Uh-oh, something went wrong!
-            // Handle errors here with style 😎
+            System.err.println("Error: Something went wrong while fetching weather data.");
         }
         return null;
     }
 
     public static void main(String[] args) {
-        String accessToken = "YOUR_GITHUB_ACCESS_TOKEN";
-        GitHubAPIWrapper apiWrapper = new GitHubAPIWrapper(accessToken);
+        String apiKey = "YOUR_OPENWEATHERMAP_API_KEY";
+        WeatherApp weatherApp = new WeatherApp(apiKey);
 
-        String username = "YourGitHubUsername";
-        String repos = apiWrapper.getUserRepos(username);
-        System.out.println("User Repositories: " + repos);
+        String city = "New York";
+        String weatherData = weatherApp.getWeather(city);
+
+        if (weatherData != null) {
+            System.out.println("Weather Data: " + weatherData);
+        } else {
+            System.out.println("Failed to retrieve weather data.");
+        }
     }
 }
